@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "quantbench"
+version = "0.1.0.dev0"
+description = "Quantization report cards for PyTorch models headed to the edge"
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Jacky Li", email = "jackydli95@gmail.com" }]
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.4",
+    "torchao>=0.8",
+    "click>=8.1",
+]
+keywords = ["quantization", "torchao", "executorch", "edge-ai", "benchmark"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "ruff>=0.4"]
+
+[project.scripts]
+quantbench = "quantbench.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/JPL11/quantbench"
+Issues = "https://github.com/JPL11/quantbench/issues"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
