@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "quantbench"
-version = "0.1.0.dev0"
+version = "0.1.0a1"
 description = "Quantization report cards for PyTorch models headed to the edge"
 readme = "README.md"
 license = "MIT"
