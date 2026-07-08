@@ -32,13 +32,33 @@ def get_eval_batches():   # -> iterable of (inputs, targets)
     ...
 ```
 
+## Configs
+
+`fp32` (baseline) · `int8wo` · `int8da-int8w` · `int4wo` · `int8da-int4w`
+(the classic ExecuTorch 8da4w recipe) · `qat-int8da-int4w` (QAT prepare
+step — what the fake-quant numerics cost before any training). Run
+`quantbench report model.py --configs all` for everything.
+
+## ExecuTorch export column
+
+With the `executorch` package installed (`pip install quantbench[pte]`),
+`--pte` adds a column with the exported `.pte` program size — and tells you
+honestly when a config can't export yet:
+
+```
+| config | ... | .pte |
+| fp32   | ... | 102 KiB |
+| int8wo | ... | 32 KiB |
+| int8da-int4w | ... | export failed (RuntimeError) |
+```
+
 ## Status
 
-Early alpha, deliberately narrow: torchao configs (`int8wo`,
-`int8da-int8w`), CPU accuracy/size/latency, markdown reports. Planned next:
-more torchao recipes (int4, QAT prepare/convert deltas), ExecuTorch `.pte`
-export size + load check, robustness rows (input noise, quantized-vs-float
-disagreement rate), and device latency via ExecuTorch runners.
+Early alpha, deliberately narrow: torchao configs, CPU
+accuracy/size/latency, `.pte` export size, markdown reports. Planned next:
+robustness rows (input noise, quantized-vs-float disagreement rate),
+QAT convert deltas after a training hook, and device latency via
+ExecuTorch runners.
 
 ## Development
 

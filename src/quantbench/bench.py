@@ -18,6 +18,8 @@ class BenchResult:
     accuracy: float
     size_bytes: int
     latency_ms: float
+    pte_bytes: int | None = None
+    pte_error: str | None = None
     error: str | None = None
 
     def accuracy_delta(self, baseline: BenchResult) -> float:
@@ -84,7 +86,26 @@ def measure_latency(
     return statistics.median(samples)
 
 
-def run_config(name, quantize_fn, base_model, batches) -> BenchResult:
+def measure_pte_size(model: torch.nn.Module, example_input) -> int:
+    """Size in bytes of the ExecuTorch .pte program exported from the model.
+
+    Requires the optional `executorch` package; the export itself can also
+    fail for ops/subclasses ExecuTorch does not support yet — callers get
+    the exception either way.
+    """
+    try:
+        from executorch.exir import to_edge
+    except ImportError as e:
+        raise ImportError(
+            "the .pte column requires the 'executorch' package: pip install executorch"
+        ) from e
+
+    exported = torch.export.export(model.eval(), (example_input,))
+    program = to_edge(exported).to_executorch()
+    return len(program.buffer)
+
+
+def run_config(name, quantize_fn, base_model, batches, export_pte: bool = False) -> BenchResult:
     """Deep-copy the model, apply a quantization config, measure everything."""
     model = copy.deepcopy(base_model)
     try:
@@ -92,12 +113,18 @@ def run_config(name, quantize_fn, base_model, batches) -> BenchResult:
             quantize_fn(model)
         batches = list(batches)
         example_input = batches[0][0]
-        return BenchResult(
+        result = BenchResult(
             name=name,
             accuracy=measure_accuracy(model, batches),
             size_bytes=measure_size(model),
             latency_ms=measure_latency(model, example_input),
         )
+        if export_pte:
+            try:
+                result.pte_bytes = measure_pte_size(model, example_input)
+            except Exception as e:  # export failures are per-config info, not fatal
+                result.pte_error = f"{type(e).__name__}: {e}"
+        return result
     except Exception as e:  # config not applicable to this model
         return BenchResult(
             name=name, accuracy=0.0, size_bytes=0, latency_ms=0.0, error=f"{type(e).__name__}: {e}"

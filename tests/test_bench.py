@@ -12,13 +12,15 @@ EXAMPLE = os.path.join(os.path.dirname(__file__), "..", "examples", "tiny_mlp.py
 
 
 def _tiny_model():
+    # Feature dims are multiples of 32 so per-group int4 configs apply,
+    # and large enough that quantization actually shrinks the weights.
     torch.manual_seed(0)
-    return torch.nn.Sequential(torch.nn.Linear(8, 16), torch.nn.ReLU(), torch.nn.Linear(16, 2))
+    return torch.nn.Sequential(torch.nn.Linear(64, 32), torch.nn.ReLU(), torch.nn.Linear(32, 2))
 
 
 def _batches():
     torch.manual_seed(1)
-    x = torch.randn(64, 8)
+    x = torch.randn(64, 64)
     y = (x.sum(dim=-1) > 0).long()
     return [(x, y)]
 
@@ -73,3 +75,45 @@ def test_cli_report_runs_end_to_end(tmp_path):
     assert result.exit_code == 0, result.output
     text = out.read_text()
     assert "| fp32 |" in text and "| int8wo |" in text
+
+
+def test_int4_configs_quantize():
+    model = _tiny_model()
+    batches = _batches()
+    base = run_config("fp32", None, model, batches)
+    for name in ("int4wo", "int8da-int4w"):
+        result = run_config(name, CONFIGS[name], model, batches)
+        assert result.error is None, result.error
+        assert result.size_bytes < base.size_bytes  # weights actually shrank
+        assert abs(result.accuracy_delta(base)) <= 0.15
+
+
+def test_qat_prepare_config():
+    model = _tiny_model()
+    batches = _batches()
+    base = run_config("fp32", None, model, batches)
+    result = run_config("qat-int8da-int4w", CONFIGS["qat-int8da-int4w"], model, batches)
+    assert result.error is None, result.error
+    # Fake quantization keeps high-precision weights: size stays ~baseline
+    # (small fake-quantizer metadata overhead is fine, shrinking is not).
+    assert result.size_bytes >= 0.95 * base.size_bytes
+    assert abs(result.accuracy_delta(base)) <= 0.15
+
+
+def test_pte_column_reports_error_or_size():
+    result = run_config("fp32", None, _tiny_model(), _batches(), export_pte=True)
+    assert result.error is None
+    # With executorch installed we get a size; without it, a clear error.
+    assert (result.pte_bytes is not None) != (result.pte_error is not None)
+    if result.pte_error is not None:
+        assert "executorch" in result.pte_error
+
+
+def test_render_markdown_with_pte_column():
+    base = BenchResult("fp32", 0.9, 1000, 2.0, pte_bytes=2048)
+    quant = BenchResult("int8wo", 0.89, 300, 1.0, pte_error="ImportError: nope")
+    text = render_markdown([base, quant], "model.py")
+    header = next(line for line in text.splitlines() if line.startswith("| config"))
+    assert header.endswith("| .pte |")
+    assert "2 KiB" in text
+    assert "export failed (ImportError)" in text

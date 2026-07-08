@@ -38,12 +38,20 @@ def configs():
     default=None,
     help="Write the markdown report here instead of stdout.",
 )
-def report(entrypoint, config_names, output):
+@click.option(
+    "--pte",
+    is_flag=True,
+    help="Add an ExecuTorch .pte export-size column (requires the executorch package).",
+)
+def report(entrypoint, config_names, output, pte):
     """Benchmark quantization configs against a model ENTRYPOINT.
 
     ENTRYPOINT is a python file defining get_model() and get_eval_batches().
     """
-    names = [n.strip() for n in config_names.split(",") if n.strip()]
+    if config_names.strip() == "all":
+        names = list(CONFIGS)
+    else:
+        names = [n.strip() for n in config_names.split(",") if n.strip()]
     unknown = [n for n in names if n not in CONFIGS]
     if unknown:
         raise click.BadParameter(f"unknown configs {unknown}; available: {sorted(CONFIGS)}")
@@ -55,7 +63,7 @@ def report(entrypoint, config_names, output):
     results = []
     for name in names:
         click.echo(f"benchmarking {name} ...", err=True)
-        results.append(run_config(name, CONFIGS[name], base_model, batches))
+        results.append(run_config(name, CONFIGS[name], base_model, batches, export_pte=pte))
 
     text = render_markdown(results, entrypoint)
     if output:
