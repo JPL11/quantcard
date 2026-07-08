@@ -1,4 +1,4 @@
-"""quantbench: quantization report cards for PyTorch models headed to the edge."""
+"""quantcard: quantization report cards for PyTorch models headed to the edge."""
 
 from .bench import BenchResult, load_entrypoint, run_config
 from .configs import CONFIGS

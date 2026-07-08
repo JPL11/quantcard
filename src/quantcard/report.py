@@ -24,7 +24,7 @@ def render_markdown(results: list[BenchResult], entry_path: str) -> str:
         rule += "---|"
 
     lines = [
-        "# quantbench report",
+        "# quantcard report",
         "",
         f"Model entrypoint: `{entry_path}`",
         "",

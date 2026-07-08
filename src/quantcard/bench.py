@@ -38,7 +38,7 @@ def load_entrypoint(path: str):
     `get_model()` returns an eval-mode-able `nn.Module`; `get_eval_batches()`
     returns an iterable of `(inputs, targets)` tuples.
     """
-    spec = importlib.util.spec_from_file_location("quantbench_entry", path)
+    spec = importlib.util.spec_from_file_location("quantcard_entry", path)
     if spec is None or spec.loader is None:
         raise ValueError(f"cannot import entrypoint {path}")
     module = importlib.util.module_from_spec(spec)

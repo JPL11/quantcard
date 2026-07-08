@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "quantbench"
+name = "quantcard"
 version = "0.1.0a1"
 description = "Quantization report cards for PyTorch models headed to the edge"
 readme = "README.md"
@@ -29,11 +29,11 @@ pte = ["executorch>=0.7"]
 dev = ["pytest>=7.0", "ruff>=0.4"]
 
 [project.scripts]
-quantbench = "quantbench.cli:main"
+quantcard = "quantcard.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/JPL11/quantbench"
-Issues = "https://github.com/JPL11/quantbench/issues"
+Homepage = "https://github.com/JPL11/quantcard"
+Issues = "https://github.com/JPL11/quantcard/issues"
 
 [tool.ruff]
 line-length = 100

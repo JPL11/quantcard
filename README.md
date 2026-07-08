@@ -1,16 +1,16 @@
-# quantbench
+# quantcard
 
 **Quantization report cards for PyTorch models headed to the edge.**
 
 You trained a model and you want it smaller and faster on-device. torchao gives
 you a dozen quantization configs; ExecuTorch consumes them; but nothing tells
 you, for *your* model, what each config costs in accuracy and buys in size and
-latency. `quantbench` answers that with one command:
+latency. `quantcard` answers that with one command:
 
 ```bash
-pip install quantbench
+pip install quantcard
 
-quantbench report my_model.py
+quantcard report my_model.py
 ```
 
 ```markdown
@@ -37,11 +37,11 @@ def get_eval_batches():   # -> iterable of (inputs, targets)
 `fp32` (baseline) · `int8wo` · `int8da-int8w` · `int4wo` · `int8da-int4w`
 (the classic ExecuTorch 8da4w recipe) · `qat-int8da-int4w` (QAT prepare
 step — what the fake-quant numerics cost before any training). Run
-`quantbench report model.py --configs all` for everything.
+`quantcard report model.py --configs all` for everything.
 
 ## ExecuTorch export column
 
-With the `executorch` package installed (`pip install quantbench[pte]`),
+With the `executorch` package installed (`pip install quantcard[pte]`),
 `--pte` adds a column with the exported `.pte` program size — and tells you
 honestly when a config can't export yet:
 

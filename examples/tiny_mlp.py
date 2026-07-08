@@ -1,7 +1,7 @@
-"""Example quantbench entrypoint: a tiny MLP on synthetic Gaussian blobs.
+"""Example quantcard entrypoint: a tiny MLP on synthetic Gaussian blobs.
 
 Run:
-    quantbench report examples/tiny_mlp.py
+    quantcard report examples/tiny_mlp.py
 """
 
 import torch

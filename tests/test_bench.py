@@ -3,10 +3,10 @@ import os
 import torch
 from click.testing import CliRunner
 
-from quantbench.bench import BenchResult, load_entrypoint, run_config
-from quantbench.cli import main
-from quantbench.configs import CONFIGS
-from quantbench.report import render_markdown
+from quantcard.bench import BenchResult, load_entrypoint, run_config
+from quantcard.cli import main
+from quantcard.configs import CONFIGS
+from quantcard.report import render_markdown
 
 EXAMPLE = os.path.join(os.path.dirname(__file__), "..", "examples", "tiny_mlp.py")
 

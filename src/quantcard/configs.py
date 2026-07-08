@@ -1,4 +1,4 @@
-"""Registry of quantization recipes benchmarked by quantbench.
+"""Registry of quantization recipes benchmarked by quantcard.
 
 Each entry maps a short name to a callable that quantizes a model in place
 using torchao's `quantize_` API — the same configs ExecuTorch consumes.

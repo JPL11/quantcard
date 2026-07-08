@@ -1,4 +1,4 @@
-"""quantbench command line interface."""
+"""quantcard command line interface."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from .report import render_markdown
 
 
 @click.group()
-@click.version_option(package_name="quantbench")
+@click.version_option(package_name="quantcard")
 def main():
     """Quantization report cards for PyTorch models headed to the edge."""
 
