@@ -11,6 +11,8 @@ latency. `quantcard` answers that with one command:
 pip install quantcard
 
 quantcard report my_model.py
+quantcard layers my_model.py --config int8wo   # per-layer sensitivity
+quantcard check my_model.py --max-acc-drop 0.5 # CI gate (exit 1 on regression)
 ```
 
 ```markdown

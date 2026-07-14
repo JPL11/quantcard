@@ -117,3 +117,19 @@ def test_render_markdown_with_pte_column():
     assert header.endswith("| .pte |")
     assert "2 KiB" in text
     assert "export failed (ImportError)" in text
+
+
+def test_layer_sensitivity_covers_eligible_layers():
+    from quantcard.bench import layer_sensitivity
+    from quantcard.configs import CONFIGS
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("tiny_mlp", "examples/tiny_mlp.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    base_acc, rows = layer_sensitivity(CONFIGS["int8wo"], mod.get_model(), mod.get_eval_batches())
+    assert 0.0 <= base_acc <= 1.0
+    assert len(rows) >= 2  # tiny_mlp has multiple Linear layers
+    for fqn, delta, err in rows:
+        assert err is None, f"{fqn}: {err}"
+        assert abs(delta) <= 1.0

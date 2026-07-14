@@ -129,3 +129,27 @@ def run_config(name, quantize_fn, base_model, batches, export_pte: bool = False)
         return BenchResult(
             name=name, accuracy=0.0, size_bytes=0, latency_ms=0.0, error=f"{type(e).__name__}: {e}"
         )
+
+
+def layer_sensitivity(quantize_fn, base_model, batches):
+    """Quantize one eligible layer at a time and measure the accuracy hit.
+
+    Returns ``(baseline_accuracy, rows)`` where each row is
+    ``(layer_fqn, accuracy_delta, error_or_None)``, unsorted.
+    """
+    batches = list(batches)
+    base_acc = measure_accuracy(copy.deepcopy(base_model), batches)
+    eligible = [
+        fqn
+        for fqn, m in base_model.named_modules()
+        if isinstance(m, (torch.nn.Linear, torch.nn.Conv2d))
+    ]
+    rows = []
+    for target in eligible:
+        model = copy.deepcopy(base_model)
+        try:
+            quantize_fn(model, filter_fn=lambda m, fqn, t=target: fqn == t)
+            rows.append((target, measure_accuracy(model, batches) - base_acc, None))
+        except Exception as e:
+            rows.append((target, 0.0, f"{type(e).__name__}: {e}"))
+    return base_acc, rows

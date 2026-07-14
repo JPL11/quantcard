@@ -13,30 +13,30 @@ from collections.abc import Callable
 import torch
 
 
-def _int8_weight_only(model: torch.nn.Module) -> None:
+def _int8_weight_only(model: torch.nn.Module, filter_fn=None) -> None:
     from torchao.quantization import Int8WeightOnlyConfig, quantize_
 
-    quantize_(model, Int8WeightOnlyConfig())
+    quantize_(model, Int8WeightOnlyConfig(), filter_fn=filter_fn)
 
 
-def _int8_dynamic_activation_int8_weight(model: torch.nn.Module) -> None:
+def _int8_dynamic_activation_int8_weight(model: torch.nn.Module, filter_fn=None) -> None:
     from torchao.quantization import Int8DynamicActivationInt8WeightConfig, quantize_
 
-    quantize_(model, Int8DynamicActivationInt8WeightConfig())
+    quantize_(model, Int8DynamicActivationInt8WeightConfig(), filter_fn=filter_fn)
 
 
-def _int4_weight_only(model: torch.nn.Module) -> None:
+def _int4_weight_only(model: torch.nn.Module, filter_fn=None) -> None:
     """int4 weight-only in the unpacked layout ExecuTorch lowers from."""
     from torchao.quantization import IntxWeightOnlyConfig, quantize_
 
-    quantize_(model, IntxWeightOnlyConfig(weight_dtype=torch.int4))
+    quantize_(model, IntxWeightOnlyConfig(weight_dtype=torch.int4), filter_fn=filter_fn)
 
 
-def _int8_dynamic_activation_int4_weight(model: torch.nn.Module) -> None:
+def _int8_dynamic_activation_int4_weight(model: torch.nn.Module, filter_fn=None) -> None:
     """The classic ExecuTorch 8da4w recipe."""
     from torchao.quantization import Int8DynamicActivationIntxWeightConfig, quantize_
 
-    quantize_(model, Int8DynamicActivationIntxWeightConfig(weight_dtype=torch.int4))
+    quantize_(model, Int8DynamicActivationIntxWeightConfig(weight_dtype=torch.int4), filter_fn=filter_fn)
 
 
 def _qat_prepare(base_config_factory: Callable[[], object]) -> Callable[[torch.nn.Module], None]:
